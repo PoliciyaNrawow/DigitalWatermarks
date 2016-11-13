@@ -31,6 +31,7 @@ def decodeVideo(originalVideo, encodedVideo):
         encodedVideo.open()
     
     watermarkArray = []
+    words = []
     
     while (originalVideo.isOpened() && encodedVideo.isOpened()):
         orgRetVal, orgFrame = originalVideo.read()
@@ -44,4 +45,8 @@ def decodeVideo(originalVideo, encodedVideo):
                     res += np.array(watermarkArray[i])
                 res = res/25
                 res.astype(numpy.uint8)
-                
+                retval, word = decode()
+                if retval == True:
+                    print(word)
+                    words.append(word)
+    return words
