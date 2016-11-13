@@ -33,7 +33,7 @@ def TransformImage (img):
     Swi = linalg.diagsvd (swi, min(Uwi.shape[0],Vhwi.shape[0]), max(Uwi.shape[1], Vhwi.shape[1]))
     #Restore chosen dwt domain with watermark embeded
     wtmkdDom = np.dot(Ui, np.dot(Swi, Vhi))
-    
+
     #Getting back to dwt image
     hh = wtmkdDom
     coeffs[len(coeffs)-2] = (lh,hh,hl)
@@ -45,4 +45,35 @@ def TransformImage (img):
     #Return to the standart colorspace
     img1 = cv2.cvtColor (img1, cv2.COLOR_YCrCb2BGR)
     return img1
+  
+def GetSubmatrWithWatermark (img):
+        #Changing colorspace to work with Y component (luminance)
+    img1 = cv2.cvtColor (img, cv2.COLOR_BGR2YCrCb)
+    img2 = img1[:,:,0]
+    #Perform wavelet transform
+    coeffs = pywt.wavedec2(img2, 'db1')
+    #hl=coeffs[len(coeffs)-2][2]
+    hh=coeffs[len(coeffs)-2][1]
+    #lh=coeffs[len(coeffs)-2][0]
+    #Let's work with hh matrix
+    dwtDom2Wtmk = hh
+    #Perform first SVD
+    Ui, si, Vhi = linalg.svd(dwtDom2Wtmk)
+    Si = linalg.diagsvd (si, min(Ui.shape[0],Vhi.shape[0]), max(Ui.shape[1], Vhi.shape[1]))
+    watermark = GenerateWatermark (Si.shape)
+    #Apply watermark
+    Siw = Si + watermark
+    #Perform second SVD
+    Uwi, swi, Vhwi = linalg.svd (Siw)
+
+    return (Uwi, Si, Vhwi)
+    
+    
+#A function to retireve the watermark
+def RetrieveWat (inp_img, orig_img):
+    Uwi0, Si0, Vhwi0 = GetSubmatrWithWatermark (orig_img)
+    Uwi, Si, Vhi = GetSubmatrWithWatermark (inp_img)
+    D = np.dot (Uwi0, np.dot (Si, Vhwi0))
+    retrWat = D - Si0
+    return retrWat 
     
