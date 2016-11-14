@@ -30,5 +30,10 @@ def CropImg (image, percent):
     cropped = image[shape[0] * percent / 2:(shape[0]*(1-percent * 2)), shape[1] * percent / 2:(shape[1]*(1-percent * 2)),:]
     return cropped
     
-#def normalizeImg (img, orig):
+def normalizeImg (img, orig):
+    norm = np.linalg.norm(img)
+    orig_norm = np.linalg.norm(orig)
+    img *= orig_norm / norm
+    return img
+
     
