@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import wavelets as wl
 import scipy as sp
+import reedsolomon as rs
 
 
 def encodeVideo(video, key):
@@ -10,12 +11,15 @@ def encodeVideo(video, key):
         video.open()
     
     fourcc = cv2.VideoWriter_fourcc(*'X264')
-    out = cv2.VideoWriter('output.mpeg',fourcc, 25.0, (1280, 720))
+    out = cv2.VideoWriter('output.mp4',fourcc, 25.0, (1920, 1080))
+
+    iteration = 0
 
     while (video.isOpened()):
         retval, frame = video.read()
         if retval == True:
-            transformedFrame = wl.TransformImage(frame, key)
+            transformedFrame = wl.TransformImage(frame, key[iteration % 25])
+            iteration += 1
             out.write(transformedFrame)
         else:
             break
@@ -23,7 +27,7 @@ def encodeVideo(video, key):
     video.release()
     out.release()
 
-def decodeVideo(originalVideo, encodedVideo):
+def decodeVideo(originalVideo, encodedVideo, key):
     if originalVideo.isOpened() == False:
         originalVideo.open()
     
@@ -31,19 +35,23 @@ def decodeVideo(originalVideo, encodedVideo):
         encodedVideo.open()
     
     watermarkArray = []
+
+    iteration = 0
     
     while (originalVideo.isOpened() && encodedVideo.isOpened()):
         orgRetVal, orgFrame = originalVideo.read()
         encRetVal, encFrame = encodedVideo.read()
         
         if orgRetVal == True && encRetVal == True:
-            watermarkArray.append(wl.RetrieveWat(encFrame, orgFrame))
+            watermarkArray.append(wl.RetrieveWat(encFrame, orgFrame, key[iteration % 25]))
+            iteration += 1
             if len(watermarkArray) == 25 :
                 watermarkArray.astype(numpy.uint8)
-                retval, word = decode(watermarkArray)
+                retval, word_ASCII = rs.decode(watermarkArray)
                 if retval == True:
+                    word = [chr(i) for i in word_ASCII]
                     print(word)
                     words.append(word)
-                else:
-                    words.append(None)
-    return words
+        else:
+            return words
+
