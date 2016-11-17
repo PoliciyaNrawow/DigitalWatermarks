@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
 import wavelets as wl
-#import scipy as sp
+import scipy as sp
 
 
-def encodeVideo(video):
+def encodeVideo(video, key):
     
     if video.isOpened() == False:
         video.open()
@@ -15,7 +15,7 @@ def encodeVideo(video):
     while (video.isOpened()):
         retval, frame = video.read()
         if retval == True:
-            transformedFrame = wl.TransformImage(frame)
+            transformedFrame = wl.TransformImage(frame, key)
             out.write(transformedFrame)
         else:
             break
@@ -31,7 +31,6 @@ def decodeVideo(originalVideo, encodedVideo):
         encodedVideo.open()
     
     watermarkArray = []
-    words = []
     
     while (originalVideo.isOpened() && encodedVideo.isOpened()):
         orgRetVal, orgFrame = originalVideo.read()
@@ -40,13 +39,11 @@ def decodeVideo(originalVideo, encodedVideo):
         if orgRetVal == True && encRetVal == True:
             watermarkArray.append(wl.RetrieveWat(encFrame, orgFrame))
             if len(watermarkArray) == 25 :
-                res = np.array(watermarkArray[0])
-                for i in range(1, 24):
-                    res += np.array(watermarkArray[i])
-                res = res/25
-                res.astype(numpy.uint8)
-                retval, word = decode()
+                watermarkArray.astype(numpy.uint8)
+                retval, word = decode(watermarkArray)
                 if retval == True:
                     print(word)
                     words.append(word)
+                else:
+                    words.append(None)
     return words
