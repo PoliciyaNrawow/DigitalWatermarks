@@ -118,5 +118,5 @@ def RetrieveWat (inp_img, orig_img, word):
                 sum += retrWat[i][j]
                 cnt += 1
     #print (sum/cnt)
-    return sum/cnt
+    return np.uint8 (round (sum / cnt))
    
