@@ -47,8 +47,11 @@ def decodeVideo(originalVideo, encodedVideo, key):
             iteration += 1
             if len(watermarkArray) == 25 :
                 watermarkArray.astype(numpy.uint8)
-                retval, word_ASCII = rs.decode(watermarkArray)
-                if retval == True:
+                try:
+                    word_ASCII = rs.decode(watermarkArray)
+                except ReedSolomonError:
+                    print("Too much mistakes")
+                else:
                     word = [chr(i) for i in word_ASCII]
                     print(word)
                     words.append(word)
