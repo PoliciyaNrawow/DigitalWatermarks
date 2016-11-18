@@ -3,27 +3,28 @@ import numpy as np
 import wavelets as wl
 import video_manager as vm
 import reedsolomon as rs
+import sys
 
-video = cv2.VideoCapture("Lady Gaga - Perfect Illusion-2.mp4")
+video = cv2.VideoCapture("Lady-Gaga-Test.mp4")
 
 if video.isOpened():
     key = input()
     
-    codec = rs.RSCodec(10)
+    codec = rs.RSCodec(5)
     
     key_ASCII = []
-    key_ASCII.append(ord(character) for character in key)
+    
+    for character in key:
+        print(ord(character))
+        key_ASCII.append(ord(character))
     
     code = codec.encode(key_ASCII)
 
-    if len(key) > 25:
-        print ("Too much characters. Please try one more time.")
-        return
+    if len(key) > 5:
+        sys.exit("Too much characters. Please try one more time.")
+    elif len(key) == 0:
+        sys.exit("No characters was typed. Please try one more time.")
     else:
-        if len(key) == 0:
-            print("No characters was typed. Please try one more time.")
-        return
-        else:
             vm.encodeVideo(video, code)
 
 

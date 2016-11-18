@@ -11,15 +11,17 @@ def encodeVideo(video, key):
         video.open()
     
     fourcc = cv2.VideoWriter_fourcc(*'X264')
-    out = cv2.VideoWriter('output.mp4',fourcc, 25.0, (1920, 1080))
+    out = cv2.VideoWriter('output.avi',fourcc, 25.0, (1920, 1080))
 
     iteration = 0
 
     while (video.isOpened()):
         retval, frame = video.read()
         if retval == True:
-            transformedFrame = wl.TransformImage(frame, key[iteration % 25])
+            transformedFrame = wl.TransformImage(frame, ((key[iteration % 25] >> iteration % 8) & 1))
+            transformedFrame = np.uint8(transformedFrame * 255)
             iteration += 1
+            print(iteration)
             out.write(transformedFrame)
         else:
             break
@@ -37,24 +39,34 @@ def decodeVideo(originalVideo, encodedVideo, key):
     watermarkArray = []
 
     iteration = 0
+
+    codec = rs.RSCodec(10)
     
-    while (originalVideo.isOpened() && encodedVideo.isOpened()):
+    while (originalVideo.isOpened() & encodedVideo.isOpened()):
         orgRetVal, orgFrame = originalVideo.read()
         encRetVal, encFrame = encodedVideo.read()
         
-        if orgRetVal == True && encRetVal == True:
-            watermarkArray.append(wl.RetrieveWat(encFrame, orgFrame, key[iteration % 25]))
+        words = []
+        
+        if orgRetVal == True & encRetVal == True:
+            watermarkArray = np.append(watermarkArray, wl.RetrieveWat(encFrame, orgFrame, key[iteration % 25]))
             iteration += 1
-            if len(watermarkArray) == 25 :
-                watermarkArray.astype(numpy.uint8)
+            print(iteration)
+            if len(watermarkArray) == 25:
+                print("we are here")
+                watermarkArray = np.array(watermarkArray)
+                watermarkArray.astype(np.uint8)
                 try:
-                    word_ASCII = rs.decode(watermarkArray)
-                except ReedSolomonError:
-                    print("Too much mistakes")
+                    word_ASCII = codec.decode(watermarkArray)
+                except rs.ReedSolomonError:
+                    print("Too much errors")
                 else:
+                    print("lol")
                     word = [chr(i) for i in word_ASCII]
                     print(word)
                     words.append(word)
+                finally:
+                    watermarkArray = []
         else:
             return words
 
