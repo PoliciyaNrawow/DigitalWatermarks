@@ -10,16 +10,19 @@ def encodeVideo(video, key):
     if video.isOpened() == False:
         video.open()
     
-    fourcc = cv2.VideoWriter_fourcc(*'X264')
-    out = cv2.VideoWriter('output.avi',fourcc, 25.0, (1920, 1080))
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    out = cv2.VideoWriter('output.avi',fourcc, 24.0, (1920,1080))
 
     iteration = 0
 
     while (video.isOpened()):
         retval, frame = video.read()
         if retval == True:
-            transformedFrame = wl.TransformImage(frame, ((key[iteration % 25] >> iteration % 8) & 1))
-            transformedFrame = np.uint8(transformedFrame * 255)
+            #if (iteration % 22 < 11):
+            #    transformedFrame = wl.TransformImage(frame, 0)
+            #else:
+            transformedFrame = wl.TransformImage(frame, ((key[(iteration // 8) % 11] >> (iteration % 8)) & 1))
+            transformedFrame = np.uint8(np.round(transformedFrame * 255))
             iteration += 1
             print(iteration)
             out.write(transformedFrame)
@@ -36,37 +39,51 @@ def decodeVideo(originalVideo, encodedVideo, key):
     if encodedVideo.isOpened() == False:
         encodedVideo.open()
     
-    watermarkArray = []
+    watermarkArray = np.uint8 (np.zeros (11))
 
     iteration = 0
-
-    codec = rs.RSCodec(10)
-    
+    preambuleReceived = True
+    preambuleCntr = 0
+    watIter = 0
+    codec = rs.RSCodec(8)
+    words = []
     while (originalVideo.isOpened() & encodedVideo.isOpened()):
         orgRetVal, orgFrame = originalVideo.read()
         encRetVal, encFrame = encodedVideo.read()
         
-        words = []
-        
+                
         if orgRetVal == True & encRetVal == True:
-            watermarkArray = np.append(watermarkArray, wl.RetrieveWat(encFrame, orgFrame, key[iteration % 25]))
+            if (preambuleReceived):
+                tmp = wl.RetrieveWat(encFrame, orgFrame, (key[watIter // 8] >> (watIter % 8)) & 1)
+                watermarkArray[watIter // 8] |= (tmp << (watIter % 8))
+                watIter += 1
+            elif (wl.RetrieveWat(encFrame, orgFrame, 0) == 0):
+                preambuleCntr += 1
+            else:
+                preambuleCntr = 0
+            if (preambuleCntr == 11):
+                preambuleReceived = True
             iteration += 1
-            print(iteration)
-            if len(watermarkArray) == 25:
+            #print(iteration)
+            if (watIter == 88):
                 print("we are here")
                 watermarkArray = np.array(watermarkArray)
-                watermarkArray.astype(np.uint8)
+                #watermarkArray.astype(np.uint8)
                 try:
                     word_ASCII = codec.decode(watermarkArray)
                 except rs.ReedSolomonError:
                     print("Too much errors")
                 else:
                     print("lol")
+                #word = [chr(i) for i in watermarkArray]
                     word = [chr(i) for i in word_ASCII]
                     print(word)
                     words.append(word)
                 finally:
-                    watermarkArray = []
+                    preambuleCntr = 0
+                    watIter = 0
+                    watermarkArray = np.uint8 (np.zeros(11))
+                    #preambuleReceived = False
         else:
             return words
 

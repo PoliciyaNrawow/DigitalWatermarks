@@ -7,8 +7,8 @@ import scipy.linalg as linalg
 def GenerateWatermark (shape, symb):
     if (type(symb) == str):
         symb = ord(symb)
-    symb = np.float32(symb)
-    watermark = np.ones(shape) / 255
+    symb = np.float32(symb) + 1
+    watermark = np.ones(shape) / 255 
     watermark *= symb
     return watermark
 
@@ -26,7 +26,18 @@ def TransformImage (img, word):
     hh=coeffs[len(coeffs)-2][1]
     lh=coeffs[len(coeffs)-2][0]
     #Let's work with hh matrix
-    dwtDom2Wtmk = hh
+    hh = ApplyWtmk (hh, word)
+    #hl= ApplyWtmk (hl, word)
+    #lh = ApplyWtmk (lh, word)
+    coeffs[len(coeffs)-2] = (lh,hh,hl)
+    #Perform inverse wawelet transform
+    img3 = pywt.waverec2(coeffs, 'db1')
+    img1[:,:,0] = img3
+    #Return to the standart colorspace
+    img1 = cv2.cvtColor (img1, cv2.COLOR_YCrCb2BGR)
+    return img1
+  
+def ApplyWtmk (dwtDom2Wtmk, word):
     #Perform first SVD
     Ui, si, Vhi = linalg.svd(dwtDom2Wtmk, full_matrices=True)
     Si = linalg.diagsvd (si, min(Ui.shape[0],Vhi.shape[0]), max(Ui.shape[1], Vhi.shape[1]))
@@ -39,17 +50,9 @@ def TransformImage (img, word):
     Swi = linalg.diagsvd (swi, min(Uwi.shape[0],Vhwi.shape[0]), max(Uwi.shape[1], Vhwi.shape[1]))
     #Restore chosen dwt domain with watermark embeded
     wtmkdDom = np.dot(Ui, np.dot(Swi, Vhi))
+    return wtmkdDom
 
-    #Getting back to dwt image
-    hh = wtmkdDom
-    coeffs[len(coeffs)-2] = (lh,hh,hl)
-    #Perform inverse wawelet transform
-    img3 = pywt.waverec2(coeffs, 'db1')
-    img1[:,:,0] = img3
-    #Return to the standart colorspace
-    img1 = cv2.cvtColor (img1, cv2.COLOR_YCrCb2BGR)
-    return img1
-  
+
 def GetSubmatrWithWatermark (img, word):
         #Changing colorspace to work with Y component (luminance)
     if (type(img[0][0][0]) == np.uint8):
@@ -96,6 +99,8 @@ def GetSubmatrWithoutWatermark (img):
     
 #A function to retireve the watermark
 def RetrieveWat (inp_img, orig_img, word):
+#    if (word != 1 && word != 0):
+#        return np.uint8(0)
     if (inp_img.shape != orig_img.shape):
         new_inp = orig_img
         for i in range (orig_img.shape[0]):
@@ -118,5 +123,5 @@ def RetrieveWat (inp_img, orig_img, word):
                 sum += retrWat[i][j]
                 cnt += 1
     #print (sum/cnt)
-    return np.uint8 (round (sum / cnt))
+    return np.uint8 (round (sum / cnt) - 1)
    

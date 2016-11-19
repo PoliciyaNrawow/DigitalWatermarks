@@ -10,7 +10,7 @@ video = cv2.VideoCapture("Lady-Gaga-Test.mp4")
 if video.isOpened():
     key = input()
     
-    codec = rs.RSCodec(5)
+    codec = rs.RSCodec(8)
     
     key_ASCII = []
     
@@ -20,11 +20,11 @@ if video.isOpened():
     
     code = codec.encode(key_ASCII)
 
-    if len(key) > 5:
+    if len(key) > 3:
         sys.exit("Too much characters. Please try one more time.")
     elif len(key) == 0:
         sys.exit("No characters was typed. Please try one more time.")
     else:
-            vm.encodeVideo(video, code)
-
+        vm.encodeVideo(video, code)
+            #vm.encodeVideo(video, key_ASCII)
 
