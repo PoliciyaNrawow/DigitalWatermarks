@@ -3,6 +3,7 @@ import numpy as np
 import wavelets as wl
 import scipy as sp
 import reedsolomon as rs
+import attacks
 
 
 def encodeVideo(video, key):
@@ -54,7 +55,7 @@ def decodeVideo(originalVideo, encodedVideo, key):
                 
         if orgRetVal == True & encRetVal == True:
             if (preambuleReceived):
-                tmp = wl.RetrieveWat(encFrame, orgFrame, (key[watIter // 8] >> (watIter % 8)) & 1)
+                tmp = wl.RetrieveWat(attacks.RotateImg (encFrame, 1), orgFrame, (key[watIter // 8] >> (watIter % 8)) & 1)
                 watermarkArray[watIter // 8] |= (tmp << (watIter % 8))
                 watIter += 1
             elif (wl.RetrieveWat(encFrame, orgFrame, 0) == 0):
