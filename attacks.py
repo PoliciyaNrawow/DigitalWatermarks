@@ -4,7 +4,7 @@ import pywt
 import scipy.linalg as linalg
 
 def RotateImg (img, ang):
-    if (type(img[0][0][0]) == np.uint8):
+    if (type(img[0][0]) == np.uint8):
         img = np.float32(img) * 1.0 / 255
     if hasattr(img, 'shape'):
         image_center = tuple(np.array(img.shape)/2)
@@ -19,27 +19,27 @@ def RotateImg (img, ang):
     return rotated_image
     
 def ChangeBrightness (img, percent):
-    if (type(img[0][0][0]) == np.uint8):
+    if (type(img[0][0]) == np.uint8):
         img = np.float32(img) * 1.0 / 255
-    img1 = cv2.cvtColor (img, cv2.COLOR_BGR2YCrCb)
-    img1[:,:,0] *= percent / 100
-    img = cv2.cvtColor (img1, cv2.COLOR_YCrCb2BGR)
-    return img
+    #img1 = cv2.cvtColor (img, cv2.COLOR_BGR2YCrCb)
+    #img1[:,:,0] *= percent / 100
+    #img = cv2.cvtColor (img1, cv2.COLOR_YCrCb2BGR)
+    return img * percent / 100
 
 def CropImg (img, percent):
-    if (type(img[0][0][0]) == np.uint8):
+    if (type(img[0][0]) == np.uint8):
         img = np.float32(img) * 1.0 / 255
     if hasattr(img, 'shape'):
         shape = tuple(img.shape)
     else:
         shape = (img.width, img.height)
     percent /= 100
-    cropped = img[np.uint32(shape[0] * percent / 2):np.uint32((shape[0]*(1-percent * 2))), np.uint32(shape[1] * percent / 2):np.uint32((shape[1]*(1-percent * 2))),:]
+    cropped = img[np.uint32(shape[0] * percent / 2):np.uint32((shape[0]*(1-percent * 2))), np.uint32(shape[1] * percent / 2):np.uint32((shape[1]*(1-percent * 2)))]
     #print (cropped)
     return cropped
     
 def NormalizeImg (img, orig):
-    if (type(img[0][0][0]) == np.uint8):
+    if (type(img[0][0]) == np.uint8):
         img = np.float32(img) * 1.0 / 255
 
     norm = np.linalg.norm(img)
