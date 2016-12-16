@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import pywt
 import scipy.linalg as linalg
+import WatermarkGenerator as wat
 
 #Generates the watermark of requested shape. The values to wtmk are placed on the main diag.
 def GenerateWatermark (shape, symb):
@@ -11,13 +12,17 @@ def GenerateWatermark (shape, symb):
     #watermark = np.ones(shape) / 255 
     #watermark *= symb
     #print (shape)
-    img = cv2.imread(symb)
+    #img = cv2.imread(symb)
+    if (symb[0] == 'l'):
+        img = cv2.imread (symb)
+    else:
+        img = wat.createWatermark (symb)
     if (img.ndim > 2):
         img = cv2.cvtColor (img, cv2.COLOR_RGB2GRAY)
     img = cv2.resize (img, shape)
     img = np.float32 (img) / 200
-    cv2.imshow ('a', img)
-    cv2.waitKey (0)
+#    cv2.imshow ('a', img)
+#    cv2.waitKey (0)
     return img
 
     
@@ -167,5 +172,5 @@ def RetrieveWat (inp_img, orig_img, word):
         #        cnt += 1
     #print (cnt)
     #print (sum/cnt)
-    return retrWat
+    return np.uint8(np.abs(retrWat))
    
