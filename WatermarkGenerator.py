@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from PIL import Image
 
 def createWatermark(pin_code):
     img = np.zeros((512,512,3), np.uint8)
