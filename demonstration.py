@@ -6,7 +6,9 @@ import WatermarkGenerator as wat
 import sys
 import WatermarkRecognizer as rec
 
-word = sys.argv[1:]
+#word = sys.argv[1:]
+print('Please enter your 4 numeric character pin code without spaces. If you use some other characters or spaces result is not predictable:')
+word = input()
 img = cv2.imread('lena.png')
 cv2.imshow('original image', img)
 print (word)
