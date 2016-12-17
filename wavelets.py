@@ -124,17 +124,12 @@ def GetSubmatrWithoutWatermark (img):
     
 #A function to retrieve the watermark
 def RetrieveWat (inp_img, orig_img, word):
-#    if (word != 1 && word != 0):
-#        return np.uint8(0)
-    #cv2.imshow('orig', orig_img)
-    #cv2.imshow('inp', inp_img)
-    print (inp_img.shape, orig_img.shape)
     if (inp_img.ndim > 2):
         inp_img = cv2.cvtColor (inp_img, cv2.COLOR_RGB2GRAY)
     if (orig_img.ndim > 2):
         orig_img = cv2.cvtColor (orig_img, cv2.COLOR_RGB2GRAY)
     if (inp_img.shape != orig_img.shape):
-        print ("FUCK!")
+        #print ("FUCK!")
         #new_inp = orig_img
         #for i in range (orig_img.shape[0]):
         #    for j in range (orig_img.shape[1]):
@@ -161,8 +156,8 @@ def RetrieveWat (inp_img, orig_img, word):
     retrWat = D - Si0
     #retrWat = D
     retrWat *= 200
-    cv2.imshow ('retr', retrWat)
-    cv2.waitKey(0)
+    #cv2.imshow ('retr', retrWat)
+    #cv2.waitKey(0)
     #sum = 0
     #cnt = 0
     #for i in range (retrWat.shape[0]):

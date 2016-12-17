@@ -34,7 +34,8 @@ img2 = attacks.RotateImg(img1, 10)
 #img2 = np.float32(np.ones(img2.shape))
 #img2 = attacks.NormalizeImg (img2, img)
 cv2.imshow('kjh', img2)
-wtmk = wavelets.RetrieveWat(img2, img, np.array(['4','5','6','7']))
+wtmk = wavelets.RetrieveWat(img2, img, word)
+
 #sum = 0
 #cnt = 0
 #for i in range(wtmk.shape[0]):
@@ -55,8 +56,8 @@ cv2.imwrite ('wtmk.png', wtmk)
 #        print (wtmk[i][j])
 #    print('\n')
 #print(np.array(wtmk))
-print (img.shape)
-wtmk = cv2.resize(wtmk, img1.shape)
+#print (type(wtmk[0][0]))
+#wtmk = cv2.resize(wtmk, img1.shape)
 cv2.imshow ('resized', wtmk)
 print (rec.recognizeWatermark(wtmk))
 cv2.imshow('AAAAAAAA', wtmk)

@@ -34,6 +34,6 @@ def recognizeWatermark(watermark):
                     arr[i][j] = img[i, j] - pic[i, j]
             norm[indx] = np.linalg.norm(arr)
         pin_code[itr] = np.argmin(norm)
-        print(norm)
+        #print(norm)
 
     return pin_code
